@@ -1,37 +1,27 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import dbConnect from "@/lib/dbConnect";
-import Admin from "@/models/Admin";
-import { createToken } from "@/lib/auth";
+import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
-
-  await dbConnect();
-
   const { email, password } = await req.json();
 
-  const admin = await Admin.findOne({ email });
+  // validate admin here
 
-  if (!admin) {
-    return NextResponse.json(
-      { message: "Invalid credentials" },
-      { status: 401 }
-    );
-  }
+  const token = jwt.sign(
+    { email },
+    process.env.JWT_SECRET!,
+    { expiresIn: "1d" }
+  );
 
-  const match = await bcrypt.compare(password, admin.password);
-
-  if (!match) {
-    return NextResponse.json(
-      { message: "Invalid credentials" },
-      { status: 401 }
-    );
-  }
-
-  const token = createToken(admin);
-
-  return NextResponse.json({
-    message: "Login successful",
-    token
+  const response = NextResponse.json({
+    message: "Login success",
   });
+
+  response.cookies.set("adminToken", token, {
+    httpOnly: true,
+    secure: false,
+    path: "/",
+    maxAge: 60 * 60 * 24,
+  });
+
+  return response;
 }

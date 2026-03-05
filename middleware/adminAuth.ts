@@ -1,20 +1,15 @@
-import { verifyToken } from "@/lib/auth";
+import jwt from "jsonwebtoken";
+import { NextRequest } from "next/server";
 
-export function adminAuth(req: Request) {
+export function adminAuth(req: NextRequest) {
 
-  const authHeader = req.headers.get("authorization");
+  const token = req.cookies.get("adminToken")?.value;
 
-  if (!authHeader) {
-    throw new Error("Unauthorized");
+  if (!token) {
+    throw new Error("No token");
   }
 
-  const token = authHeader.split(" ")[1];
-
-  const decoded = verifyToken(token);
-
-  if (!decoded) {
-    throw new Error("Invalid Token");
-  }
+  const decoded = jwt.verify(token, process.env.JWT_SECRET!);
 
   return decoded;
 }

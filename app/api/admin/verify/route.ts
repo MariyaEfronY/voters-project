@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { adminAuth } from "@/middleware/adminAuth";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
 
   try {
 
