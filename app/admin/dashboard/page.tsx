@@ -57,6 +57,7 @@ export default function Dashboard() {
         <p className="text-slate-600 font-medium animate-pulse">Synchronizing Live Data...</p>
       </div>
     );
+
   }
 
   const statItems = [
