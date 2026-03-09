@@ -1,348 +1,106 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import {
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  AlertCircle,
-  Vote,
-  UserCheck,
-  FileCheck,
-} from "lucide-react";
+import { useState } from "react";
+import Link from "next/link";
+import { Search, Landmark, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import AboutSection from "./components/AboutSection";
+import RulesSection from "./components/RulesSection";
 
-import Header from "./components/Header";
-
-interface Nominee {
-  _id: string;
-  name: string;
-  party: string;
-}
-
-export default function VotingWizard() {
-  const router = useRouter();
-
-  const [step, setStep] = useState(1);
-  const [voterIdInput, setVoterIdInput] = useState("");
-  const [nominees, setNominees] = useState<Nominee[]>([]);
-  const [selectedNominee, setSelectedNominee] = useState<Nominee | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState({ type: "", msg: "" });
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-
-    fetch("/api/nominees")
-      .then((res) => res.json())
-      .then((res) => setNominees(res.data || []))
-      .catch(() =>
-        setStatus({
-          type: "error",
-          msg: "Failed to load nominees. Please refresh.",
-        })
-      );
-  }, []);
-
-  const handleNext = () => {
-    setStatus({ type: "", msg: "" });
-    setStep(step + 1);
-  };
-
-  const handleBack = () => {
-    setStatus({ type: "", msg: "" });
-    setStep(step - 1);
-  };
-
-  const submitVote = async () => {
-    setLoading(true);
-    setStatus({ type: "", msg: "" });
-
-    try {
-      const res = await fetch("/api/vote", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          voterIdString: voterIdInput.trim(),
-          nomineeId: selectedNominee!._id,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setStep(4);
-      } else {
-        setStatus({ type: "error", msg: data.message || "Voting failed" });
-      }
-    } catch {
-      setStatus({ type: "error", msg: "Connection failed. Please try again." });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const steps = [
-    { number: 1, label: "Identity", icon: UserCheck },
-    { number: 2, label: "Select", icon: Vote },
-    { number: 3, label: "Confirm", icon: FileCheck },
-  ];
+export default function StatePortal() {
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <>
-      <Header />
-
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 px-4 py-12 relative overflow-hidden">
-
-        {/* Background Glow */}
-        {mounted && (
-          <>
-            <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse" />
-          </>
-        )}
-
-        <div className="max-w-2xl mx-auto mt-10 relative z-10">
-
-          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-
-            {/* HEADER */}
-            <div className="bg-gradient-to-r from-blue-800 to-blue-950 p-6 text-white">
-
-              <div className="flex justify-between items-center flex-wrap gap-4">
-
-                <h1 className="text-2xl font-bold flex items-center gap-2">
-                  <Vote size={26} />
-                  Secure Voting
-                </h1>
-
-                {/* STEPS */}
-                <div className="flex items-center gap-2">
-                  {steps.map((s) => (
-                    <div key={s.number} className="flex items-center">
-
-                      <div
-                        className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold
-                        ${
-                          step === s.number
-                            ? "bg-blue-400 text-blue-900"
-                            : step > s.number
-                            ? "bg-green-500 text-white"
-                            : "bg-white/20"
-                        }`}
-                      >
-                        {step > s.number ? "✓" : s.number}
-                      </div>
-
-                      {s.number < steps.length && (
-                        <div
-                          className={`w-8 h-1 mx-1 ${
-                            step > s.number
-                              ? "bg-green-500"
-                              : "bg-white/30"
-                          }`}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-              </div>
-
-              <p className="text-blue-200 text-sm mt-2">
-                Step {step} of {steps.length}
-              </p>
-
-            </div>
-
-            {/* CONTENT */}
-            <div className="p-8">
-
-              {status.msg && (
-                <div className="mb-6 flex gap-3 p-4 bg-red-50 text-red-700 rounded-xl border border-red-200 animate-shake">
-                  <AlertCircle />
-                  {status.msg}
-                </div>
-              )}
-
-              {/* STEP 1 */}
-              {step === 1 && (
-                <div className="space-y-6">
-
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-800">
-                      Identify Yourself
-                    </h2>
-                    <p className="text-gray-500">
-                      Enter your voter ID to continue
-                    </p>
-                  </div>
-
-                  <input
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl text-black font-mono text-lg
-                    focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
-                    placeholder="VT-12345-ABCD"
-                    value={voterIdInput}
-                    onChange={(e) =>
-                      setVoterIdInput(e.target.value.toUpperCase())
-                    }
-                  />
-
-                  <button
-                    onClick={handleNext}
-                    disabled={!voterIdInput.trim()}
-                    className="w-full py-4 rounded-xl bg-blue-600 text-white font-bold
-                    hover:bg-blue-700 transition"
-                  >
-                    Continue
-                  </button>
-
-                </div>
-              )}
-
-              {/* STEP 2 */}
-              {step === 2 && (
-                <div className="space-y-4">
-
-                  {nominees.map((n) => (
-                    <div
-                      key={n._id}
-                      onClick={() => setSelectedNominee(n)}
-                      className={`p-5 rounded-xl border-2 cursor-pointer transition-all flex justify-between items-center
-                      ${
-                        selectedNominee?._id === n._id
-                          ? "border-blue-500 bg-blue-50 shadow"
-                          : "border-gray-200 hover:border-blue-400"
-                      }`}
-                    >
-
-                      <div>
-                        <p className="font-bold text-gray-800 text-lg">
-                          {n.name}
-                        </p>
-                        <p className="text-blue-600 font-medium text-sm">
-                          {n.party}
-                        </p>
-                      </div>
-
-                      {selectedNominee?._id === n._id && (
-                        <CheckCircle className="text-blue-600" />
-                      )}
-
-                    </div>
-                  ))}
-
-                  <div className="flex gap-4 pt-4">
-
-                    <button
-                      onClick={handleBack}
-                      className="flex-1 py-3 bg-gray-200 rounded-xl hover:bg-gray-300"
-                    >
-                      Back
-                    </button>
-
-                    <button
-                      onClick={handleNext}
-                      disabled={!selectedNominee}
-                      className="flex-1 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
-                    >
-                      Review
-                    </button>
-
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 3 */}
-              {step === 3 && selectedNominee && (
-                <div className="space-y-6 text-center">
-
-                  <h2 className="text-2xl font-bold text-gray-800">
-                    Confirm Your Vote
-                  </h2>
-
-                  <div className="bg-gray-50 p-6 rounded-xl border">
-
-                    <p className="font-mono text-gray-800">
-                      {voterIdInput}
-                    </p>
-
-                    <p className="text-xl font-bold text-blue-700">
-                      {selectedNominee.name}
-                    </p>
-
-                    <p className="text-blue-600">
-                      {selectedNominee.party}
-                    </p>
-
-                  </div>
-
-                  <button
-                    onClick={submitVote}
-                    disabled={loading}
-                    className="w-full py-4 rounded-xl bg-green-600 text-white font-bold
-                    hover:bg-green-700 transition flex items-center justify-center gap-2"
-                  >
-
-                    {loading ? (
-                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      "Cast Vote"
-                    )}
-
-                  </button>
-
-                </div>
-              )}
-
-              {/* STEP 4 SUCCESS */}
-              {step === 4 && (
-                <div className="text-center py-12 space-y-6">
-
-                  <CheckCircle className="w-24 h-24 text-green-500 mx-auto animate-bounce" />
-
-                  <h2 className="text-3xl font-bold text-gray-800">
-                    Vote Recorded Successfully
-                  </h2>
-
-                  <p className="text-gray-500">
-                    Your vote has been securely saved.
-                  </p>
-
-                  <button
-                    onClick={() => router.push("/")}
-                    className="px-8 py-4 bg-blue-800 text-white rounded-xl font-bold
-                    hover:bg-blue-900 transition"
-                  >
-                    Return Home
-                  </button>
-
-                </div>
-              )}
-
-            </div>
+    <div className="min-h-screen bg-white font-sans text-slate-900 scroll-smooth">
+      {/* 1. TOP OFFICIAL BAR */}
+      <div className="bg-slate-100 border-b border-slate-200 py-2 px-6">
+        <div className="max-w-7xl mx-auto flex justify-between items-center text-[11px] font-bold uppercase tracking-wider text-slate-500">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-orange-500" /> Official State Government Portal
+            </span>
           </div>
-
-          <p className="text-center text-blue-200 text-sm mt-6">
-            All votes are encrypted and secure.
-          </p>
-
+          <div className="flex gap-4">
+            <button className="hover:text-slate-900 transition-colors">English | Hindi</button>
+          </div>
         </div>
       </div>
 
-      <style>{`
-        @keyframes shake {
-          0%,100%{transform:translateX(0)}
-          25%{transform:translateX(-5px)}
-          75%{transform:translateX(5px)}
-        }
+      {/* 2. MAIN NAVIGATION */}
+      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-900 rounded-lg flex items-center justify-center text-white">
+              <Landmark size={28} />
+            </div>
+            <div>
+              <h1 className="text-xl font-black leading-tight text-blue-900 uppercase">State Election</h1>
+              <p className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase">Commission of India</p>
+            </div>
+          </div>
+          <div className="hidden lg:flex items-center gap-8 text-sm font-bold text-slate-600">
+            <Link href="/" className="text-blue-600 border-b-2 border-blue-600 pb-1">Home</Link>
+            <a href="#about" className="hover:text-blue-600 transition-colors">About Us</a>
 
-        .animate-shake{
-          animation:shake .4s ease-in-out
-        }
-      `}</style>
+            <Link href="/login">
+              <button className="bg-blue-900 text-white px-6 py-2.5 rounded-full hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/20">
+                Admin Login
+              </button>
+            </Link>
+          </div>
+        </div>
+      </nav>
 
-    </>
+      {/* 3. HERO SECTION */}
+      <section className="relative bg-blue-900 py-24 px-6 overflow-hidden">
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: `radial-gradient(#fff 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
+        <div className="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}>
+            <span className="inline-block px-4 py-1.5 bg-blue-500/30 border border-blue-400/30 rounded-full text-xs font-black uppercase tracking-widest mb-6 text-white">
+              General Elections 2026
+            </span>
+            <h2 className="text-5xl md:text-6xl font-black leading-[1.1] mb-6 text-white">
+              Your Vote is Your <br /><span className="text-blue-400">Voice & Power.</span>
+            </h2>
+            <div className="relative max-w-md group">
+              <input
+                type="text"
+                placeholder="Find services, voter ID, or results..."
+                className="w-full pl-14 pr-4 py-5 bg-white rounded-2xl text-slate-900 font-medium outline-none focus:ring-4 focus:ring-blue-400/40 transition-all"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+            </div>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="hidden lg:block relative">
+            <div className="bg-white/10 backdrop-blur-md p-4 rounded-[3rem] border border-white/20">
+              <img src="portal_image.svg" alt="Landmark" className="rounded-[2.5rem] grayscale-[0.2] hover:grayscale-0 transition-all duration-700 w-full object-cover aspect-video" />
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 4. SECTIONS */}
+      <AboutSection />
+      <RulesSection />
+
+      {/* 5. FOOTER (Modified to include your original footer) */}
+      <footer className="bg-slate-900 text-white py-16 px-6">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12 text-center md:text-left">
+          <div className="col-span-2">
+            <div className="flex items-center justify-center md:justify-start gap-4 mb-6">
+              <Landmark size={24} className="text-blue-400" />
+              <h1 className="text-lg font-black uppercase tracking-tighter">State Election Commission</h1>
+            </div>
+            <p className="text-slate-400 max-w-md">Encouraging participation through secure digital infrastructure.</p>
+          </div>
+          <div>
+            <h5 className="font-black uppercase text-xs tracking-widest mb-6 text-blue-400">Quick Support</h5>
+            <p className="text-sm text-slate-400">Toll Free: 1800-ELECTIONS</p>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
