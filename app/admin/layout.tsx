@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  UserCheck, 
-  Users, 
-  BarChart3, 
-  LogOut, 
-  Menu, 
+import {
+  LayoutDashboard,
+  UserCheck,
+  Users,
+  BarChart3,
+  LogOut,
+  Menu,
   X,
   ShieldCheck
 } from "lucide-react";
@@ -28,25 +28,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = () => {
     localStorage.removeItem("token"); // Or your auth utility
-    router.push("/admin/login");
+    router.push("/login");
   };
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex">
       {/* Sidebar */}
-      <aside 
-        className={`${
-          isSidebarOpen ? "w-72" : "w-20"
-        } hidden md:flex flex-col bg-slate-900 text-white transition-all duration-300 ease-in-out sticky top-0 h-screen`}
+      <aside
+        className={`${isSidebarOpen ? "w-72" : "w-20"
+          } hidden md:flex flex-col bg-slate-900 text-white transition-all duration-300 ease-in-out sticky top-0 h-screen`}
       >
         <div className="p-6 flex items-center gap-4 border-b border-slate-800">
           <div className="bg-blue-600 p-2 rounded-lg">
             <ShieldCheck size={24} />
           </div>
           {isSidebarOpen && (
-            <motion.span 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="font-bold text-xl tracking-tight"
             >
               VOTE<span className="text-blue-500">ADMIN</span>
@@ -61,11 +60,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <button
                 key={item.name}
                 onClick={() => router.push(item.path)}
-                className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
-                  isActive 
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" 
-                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                }`}
+                className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${isActive
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                  }`}
               >
                 {item.icon}
                 {isSidebarOpen && <span className="font-medium">{item.name}</span>}
@@ -75,7 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div className="p-4 border-t border-slate-800">
-          <button 
+          <button
             onClick={handleLogout}
             className="w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
           >
@@ -88,13 +86,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10">
-          <button 
+          <button
             onClick={() => setSidebarOpen(!isSidebarOpen)}
             className="p-2 hover:bg-slate-100 rounded-lg text-slate-600"
           >
             {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-          
+
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-semibold text-slate-900">System Admin</p>
