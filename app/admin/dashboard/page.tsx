@@ -18,33 +18,38 @@ export default function Dashboard() {
       return;
     }
 
-    // Verify Admin & Fetch Stats
-    const initDashboard = async () => {
+    const fetchStats = async () => {
       try {
-        const verifyRes = await fetch("/api/admin/verify", {
-          headers: { Authorization: `Bearer ${token}` },
+        const statsRes = await fetch("/api/admin/stats", {
+          // Prevent caching so data is always fresh
+          cache: 'no-store'
         });
-
-        if (!verifyRes.ok) {
-          router.push("/admin/login");
-          return;
-        }
-
-        // Fetch Live Counts
-        const statsRes = await fetch("/api/admin/stats");
         const statsData = await statsRes.json();
         if (statsData.success) setStats(statsData.stats);
-
-        setLoading(false);
       } catch (err) {
-        console.error("Dashboard init error", err);
+        console.error("Failed to fetch stats", err);
+      }
+    };
+
+    const initDashboard = async () => {
+      const verifyRes = await fetch("/api/admin/verify", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!verifyRes.ok) {
+        router.push("/admin/login");
+      } else {
+        await fetchStats();
         setLoading(false);
       }
     };
 
     initDashboard();
-  }, [router]);
 
+    // Refresh data every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, [router]);
   if (loading) {
     return (
       <div className="h-[80vh] flex flex-col items-center justify-center space-y-4">
