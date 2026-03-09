@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { saveToken } from "../../utils/auth";
+import { saveToken } from "../utils/auth";
 import { Eye, EyeOff, ShieldCheck, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -69,8 +69,8 @@ export default function AdminLogin() {
         <div className="space-y-6">
           {/* Email Input Group */}
           <div className="space-y-2">
-            <label 
-              htmlFor="email" 
+            <label
+              htmlFor="email"
               className="block text-black text-sm font-bold text-slate-700 ml-1"
             >
               Email Address
@@ -87,8 +87,8 @@ export default function AdminLogin() {
 
           {/* Password Input Group */}
           <div className="space-y-2">
-            <label 
-              htmlFor="password" 
+            <label
+              htmlFor="password"
               className="block text-sm font-bold text-slate-700 ml-1"
             >
               Password
